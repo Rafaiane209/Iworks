@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IWorks - Conectando Freelancers e Clientes</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #0f3460, #16213e);
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .logo h1 {
+      font-size: 1.8rem;
+    }
+    .logo span {
+      color: #e94560;
+    }
+    .logo p {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* Role Selector */
+    .role-selector {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      padding: 0.3rem;
+      border-radius: 50px;
+    }
+    .role-btn {
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 50px;
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .role-btn.active {
+      background: #e94560;
+      color: white;
+    }
+
+    /* Container principal */
+    .container {
+      display: flex;
+      min-height: calc(100vh - 120px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      padding: 2rem 1rem;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      color: #333;
+    }
+    .menu-item:hover {
+      background: #f5f5f5;
+      transform: translateX(5px);
+    }
+    .menu-item i {
+      width: 24px;
+      color: #e94560;
+    }
+
+    /* Conteúdo principal */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .content h2 {
+      color: #16213e;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 3px solid #e94560;
+      display: inline-block;
+    }
+
+    /* Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transition: transform 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      color: #16213e;
+      margin-bottom: 0.5rem;
+    }
+    .card .rating {
+      color: #f4a261;
+      margin: 0.5rem 0;
+    }
+
+    /* Botões */
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-top: 0.5rem;
+      margin-right: 0.5rem;
+    }
+    .btn-primary {
+      background: #e94560;
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #c73e56;
+    }
+    .btn-secondary {
+      background: #16213e;
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #0f3460;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #e94560;
+      color: #e94560;
+    }
+    .btn-outline:hover {
+      background: #e94560;
+      color: white;
+    }
+
+    /* Chat */
+    .chat-container {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-top: 1.5rem;
+    }
+    .chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #f9f9f9;
+    }
+    .message {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: white;
+      border-radius: 10px;
+      border-left: 3px solid #e94560;
+    }
+    .chat-input {
+      display: flex;
+      padding: 1rem;
+      gap: 0.5rem;
+      border-top: 1px solid #e0e0e0;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    /* Listas */
+    .history-list, .fav-list {
+      list-style: none;
+    }
+    .history-list li, .fav-list li {
+      background: white;
+      margin-bottom: 0.8rem;
+      padding: 1rem;
+      border-radius: 10px;
+      border-left: 4px solid #e94560;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      background: #d4edda;
+      color: #155724;
+    }
+
+    footer {
+      background: #16213e;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        padding: 1rem;
+      }
+      .menu-item {
+        display: inline-flex;
+        margin-right: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <h1>I<span>Works</span></h1>
+      <p>Conectando talentos e oportunidades</p>
+    </div>
+    <div class="role-selector">
+      <button class="role-btn active" data-role="freelancer">👤 Freelancer</button>
+      <button class="role-btn" data-role="empresa">🏢 Empresa</button>
+      <button class="role-btn" data-role="admin">⚙️ Admin</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar" id="sidebar"></div>
+    <div class="content" id="content">
+      <h2 id="pageTitle">Bem-vindo ao IWorks</h2>
+      <div id="pageContent"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p>IWorks - Plataforma de conexão entre freelancers e clientes | Segurança e confiança</p>
+  </footer>
+
+  <script>
+    // ==================== DADOS ====================
+    let freelancers = [
+      { id: 1, nome: "Ana Silva", categoria: "Design Gráfico", rating: 4.9, preco: "R$ 80/hora", portfolio: "Logos, identidade visual" },
+      { id: 2, nome: "Carlos Menezes", categoria: "Desenvolvimento Web", rating: 4.8, preco: "R$ 120/hora", portfolio: "React, Node.js" },
+      { id: 3, nome: "Juliana Rocha", categoria: "Marketing Digital", rating: 5.0, preco: "R$ 90/hora", portfolio: "SEO, Google Ads" },
+      { id: 4, nome: "Rafael Lima", categoria: "Redação", rating: 4.7, preco: "R$ 50/hora", portfolio: "Artigos, blogs" }
+    ];
+
+    let empresas = [
+      { id: 1, nome: "TechNova Solutions", servicos: "Desenvolvimento Web", avaliacao: 4.8, portfolio: "Ecommerce, Apps" },
+      { id: 2, nome: "Criativa Design", servicos: "Design Gráfico", avaliacao: 4.9, portfolio: "Branding, Social Media" }
+    ];
+
+    let roleAtual = "freelancer";
+    let contratacoes = [];
+    let favoritos = [];
+    let mensagens = [];
+    let proximoIdContrato = 1;
+    let categorias = ["Design Gráfico", "Desenvolvimento Web", "Marketing Digital", "Redação", "Vídeo"];
+
+    // ==================== FUNÇÕES GLOBAIS ====================
+    window.contratar = function(id) {
+      let freelancer = freelancers.find(f => f.id === id);
+      if (freelancer) {
+        contratacoes.push({
+          id: proximoIdContrato++,
+          profissional: freelancer.nome,
+          servico: freelancer.categoria,
+          status: "Em andamento",
+          data: new Date().toLocaleDateString(),
+          avaliado: false
+        });
+        alert(`✅ Contratação realizada com ${freelancer.nome}!`);
+        if (roleAtual === "freelancer") {
+          mostrarHistorico();
+        }
+      }
+    };
+
+    window.favoritar = function(id) {
+      if (!favoritos.includes(id)) {
+        favoritos.push(id);
+        alert("⭐ Adicionado aos favoritos!");
+        if (roleAtual === "freelancer") {
+          mostrarFavoritos();
+        }
+      } else {
+        alert("Já está nos favoritos!");
+      }
+    };
+
+    window.avaliar = function(id) {
+      let nota = prompt("Dê sua nota de 1 a 5:", "5");
+      if (nota && nota >= 1 && nota <= 5) {
+        let contrato = contratacoes.find(c => c.id === id);
+        if (contrato && !contrato.avaliado) {
+          contrato.avaliado = true;
+          contrato.nota = nota;
+          alert(`⭐ Avaliação ${nota} estrelas registrada!`);
+          mostrarHistorico();
+        } else if (contrato && contrato.avaliado) {
+          alert("Este serviço já foi avaliado!");
+        }
+      }
+    };
+
+    window.enviarMensagem = function() {
+      let input = document.getElementById("msgInput");
+      let texto = input.value.trim();
+      if (texto) {
+        let nome = roleAtual === "freelancer" ? "Freelancer" : (roleAtual === "empresa" ? "Empresa" : "Admin");
+        mensagens.push({
+          de: nome,
+          texto: texto,
+          hora: new Date().toLocaleTimeString()
+        });
+        input.value = "";
+        atualizarChat();
+      }
+    };
+
+    window.atualizarChat = function() {
+      let chatDiv = document.getElementById("chatMessages");
+      if (chatDiv) {
+        if (mensagens.length === 0) {
+          chatDiv.innerHTML = '<p style="text-align:center; color:#999;">💬 Nenhuma mensagem ainda</p>';
+        } else {
+          chatDiv.innerHTML = mensagens.map(m => `
+            <div class="message">
+              <strong>${m.de}:</strong> ${m.texto}
+              <small style="color:#999; float:right;">${m.hora}</small>
+            </div>
+          `).join('');
+        }
+      }
+    };
+
+    window.aceitarProposta = function() {
+      alert("✅ Proposta aceita! O cliente será notificado.");
+    };
+
+    window.recusarProposta = function() {
+      alert("❌ Proposta recusada.");
+    };
+
+    window.editarCategoria = function(index) {
+      let nova = prompt("Nova categoria:", categorias[index]);
+      if (nova && nova.trim()) {
+        categorias[index] = nova.trim();
+        mostrarGerenciarCategorias();
+      }
+    };
+
+    window.adicionarCategoria = function() {
+      let input = document.getElementById("novaCategoria");
+      let nova = input.value.trim();
+      if (nova) {
+        categorias.push(nova);
+        input.value = "";
+        mostrarGerenciarCategorias();
+        alert("Categoria adicionada!");
+      }
+    };
+
+    window.suspender = function(tipo, id) {
+      alert(`⚠️ ${tipo} ${id} foi suspenso da plataforma.`);
+    };
+
+    // ==================== MENUS E NAVEGAÇÃO ====================
+    function renderSidebar() {
+      let sidebar = document.getElementById("sidebar");
+      let menus = {
+        freelancer: [
+          { icone: "🔍", nome: "Buscar Freelancers", acao: "buscar" },
+          { icone: "👤", nome: "Meu Perfil", acao: "perfil" },
+          { icone: "📋", nome: "Histórico de Contratações", acao: "historico" },
+          { icone: "⭐", nome: "Meus Favoritos", acao: "favoritos" },
+          { icone: "💬", nome: "Chat Direto", acao: "chat" }
+        ],
+        empresa: [
+          { icone: "🏢", nome: "Perfil da Empresa", acao: "perfilEmpresa" },
+          { icone: "💰", nome: "Serviços e Preços", acao: "servicos" },
+          { icone: "📨", nome: "Solicitações Recebidas", acao: "solicitacoes" },
+          { icone: "⚙️", nome: "Serviços em Andamento", acao: "andamento" },
+          { icone: "⭐", nome: "Avaliações Recebidas", acao: "avaliacoes" },
+          { icone: "📁", nome: "Histórico de Trabalhos", acao: "historicoEmpresa" },
+          { icone: "💬", nome: "Chat com Clientes", acao: "chat" }
+        ],
+        admin: [
+          { icone: "👥", nome: "Gerenciar Usuários", acao: "gerenciarUsuarios" },
+          { icone: "📊", nome: "Monitorar Atividades", acao: "monitorar" },
+          { icone: "🚫", nome: "Moderar Conteúdos", acao: "moderar" },
+          { icone: "🏷️", nome: "Gerenciar Categorias", acao: "categorias" },
+          { icone: "📈", nome: "Relatórios", acao: "relatorios" },
+          { icone: "🆘", nome: "Suporte", acao: "suporte" },
+          { icone: "🔒", nome: "Segurança", acao: "seguranca" }
+        ]
+      };
+
+      let menuAtual = menus[roleAtual];
+      sidebar.innerHTML = menuAtual.map(item => `
+        <div class="menu-item" onclick="executarAcao('${item.acao}')">
+          <span>${item.icone}</span>
+          <span>${item.nome}</span>
+        </div>
+      `).join('');
+    }
+
+    window.executarAcao = function(acao) {
+      if (roleAtual === "freelancer") {
+        if (acao === "buscar") mostrarBuscar();
+        else if (acao === "perfil") mostrarPerfil();
+        else if (acao === "historico") mostrarHistorico();
+        else if (acao === "favoritos") mostrarFavoritos();
+        else if (acao === "chat") mostrarChat();
+      } else if (roleAtual === "empresa") {
+        if (acao === "perfilEmpresa") mostrarPerfilEmpresa();
+        else if (acao === "servicos") mostrarServicos();
+        else if (acao === "solicitacoes") mostrarSolicitacoes();
+        else if (acao === "andamento") mostrarAndamento();
+        else if (acao === "avaliacoes") mostrarAvaliacoesEmpresa();
+        else if (acao === "historicoEmpresa") mostrarHistoricoEmpresa();
+        else if (acao === "chat") mostrarChat();
+      } else if (roleAtual === "admin") {
+        if (acao === "gerenciarUsuarios") mostrarGerenciarUsuarios();
+        else if (acao === "monitorar") mostrarMonitorar();
+        else if (acao === "moderar") mostrarModerar();
+        else if (acao === "categorias") mostrarGerenciarCategorias();
+        else if (acao === "relatorios") mostrarRelatorios();
+        else if (acao === "suporte") mostrarSuporte();
+        else if (acao === "seguranca") mostrarSeguranca();
+      }
+    };
+
+    // ==================== TELAS FREELANCER ====================
+    function mostrarBuscar() {
+      document.getElementById("pageTitle").innerHTML = "🔍 Buscar Freelancers";
+      let html = `<div class="cards-grid">`;
+      freelancers.forEach(f => {
+        html += `
+          <div class="card">
+            <h3>${f.nome}</h3>
+            <div class="rating">⭐ ${f.rating}</div>
+            <p>📌 ${f.categoria}</p>
+            <p>💰 ${f.preco}</p>
+            <p>🎨 ${f.portfolio}</p>
+            <button class="btn btn-primary" onclick="contratar(${f.id})">📞 Contratar</button>
+            <button class="btn btn-outline" onclick="favoritar(${f.id})">❤️ Favoritar</button>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function mostrarPerfil() {
+      document.getElementById("pageTitle").innerHTML = "👤 Meu Perfil";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <h3>Isabelle Demétrio Carvalho</h3>
+          <p>📧 isabelle@iworks.com</p>
+          <p>📱 (11) 98765-4321</p>
+          <p>📍 São Paulo, SP</p>
+          <p>🎯 UX/UI Designer | Figma | Adobe XD</p>
+          <button class="btn btn-primary" onclick="alert('Edição de perfil em breve')">✏️ Editar Perfil</button>
+        </div>
+      `;
+    }
+
+    function mostrarHistorico() {
+      document.getElementById("pageTitle").innerHTML = "📋 Histórico de Contratações";
+      if (contratacoes.length === 0) {
+        document.getElementById("pageContent").innerHTML = '<div class="card"><p>Nenhuma contratação ainda. Busque freelancers e contrate!</p></div>';
+        return;
+      }
+      let html = `<ul class="history-list">`;
+      contratacoes.forEach(c => {
+        html += `
+          <li>
+            <strong>${c.servico}</strong> - ${c.profissional}<br>
+            Status: <span class="status">${c.status}</span><br>
+            Data: ${c.data}<br>
+            ${!c.avaliado ? `<button class="btn btn-secondary" onclick="avaliar(${c.id})">⭐ Avaliar</button>` : `<span>✅ Avaliado (${c.nota}⭐)</span>`}
+          </li>
+        `;
+      });
+      html += `</ul>`;
+      document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function mostrarFavoritos() {
+      document.getElementById("pageTitle").innerHTML = "⭐ Meus Favoritos";
+      let favs = freelancers.filter(f => favoritos.includes(f.id));
+      if (favs.length === 0) {
+        document.getElementById("pageContent").innerHTML = '<div class="card"><p>Nenhum favorito ainda. Adicione profissionais aos favoritos!</p></div>';
+        return;
+      }
+      let html = `<ul class="fav-list">`;
+      favs.forEach(f => {
+        html += `<li><strong>${f.nome}</strong> - ${f.categoria} - ⭐ ${f.rating}<br><button class="btn btn-primary" onclick="contratar(${f.id})">Contratar</button></li>`;
+      });
+      html += `</ul>`;
+      document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function mostrarChat() {
+      document.getElementById("pageTitle").innerHTML = "💬 Chat Direto";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input">
+            <input type="text" id="msgInput" placeholder="Digite sua mensagem...">
+            <button class="btn btn-primary" onclick="enviarMensagem()">Enviar</button>
+          </div>
+        </div>
+      `;
+      atualizarChat();
+    }
+
+    // ==================== TELAS EMPRESA ====================
+    function mostrarPerfilEmpresa() {
+      document.getElementById("pageTitle").innerHTML = "🏢 Perfil da Empresa";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <h3>TechNova Solutions</h3>
+          <p>📧 contato@technova.com</p>
+          <p>📞 (11) 3456-7890</p>
+          <p>⭐ Avaliação: 4.8</p>
+          <h4>Portfólio:</h4>
+          <ul><li>Ecommerce para Varejo XYZ</li><li>App Food Delivery</li><li>Sistema ERP</li></ul>
+          <button class="btn btn-primary" onclick="alert('Adicionar portfólio')">➕ Adicionar Portfólio</button>
+        </div>
+      `;
+    }
+
+    function mostrarServicos() {
+      document.getElementById("pageTitle").innerHTML = "💰 Serviços e Preços";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="cards-grid">
+          <div class="card"><h3>Desenvolvimento Web</h3><p>Websites e e-commerces</p><p><strong>R$ 2.000 - R$ 8.000</strong></p></div>
+          <div class="card"><h3>Aplicativos Mobile</h3><p>iOS e Android</p><p><strong>R$ 5.000 - R$ 15.000</strong></p></div>
+          <div class="card"><h3>Consultoria</h3><p>Otimização de sistemas</p><p><strong>R$ 300/hora</strong></p></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:1rem;" onclick="alert('Definir novos serviços')">✏️ Definir novos serviços</button>
+      `;
+    }
+
+    function mostrarSolicitacoes() {
+      document.getElementById("pageTitle").innerHTML = "📨 Solicitações de Trabalho";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card"><h3>Solicitação de Ana Silva</h3><p>Site institucional - R$ 3.500</p><button class="btn btn-primary" onclick="aceitarProposta()">✅ Aceitar</button><button class="btn btn-outline" onclick="recusarProposta()">❌ Recusar</button></div>
+        <div class="card" style="margin-top:1rem;"><h3>Solicitação de Carlos Menezes</h3><p>Manutenção ERP - R$ 2.000</p><button class="btn btn-primary" onclick="aceitarProposta()">✅ Aceitar</button><button class="btn btn-outline" onclick="recusarProposta()">❌ Recusar</button></div>
+      `;
+    }
+
+    function mostrarAndamento() {
+      document.getElementById("pageTitle").innerHTML = "⚙️ Serviços em Andamento";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card"><h3>E-commerce ModaStore</h3><div class="status">Progresso: 65%</div><p>Previsão: 15/05/2026</p></div>
+        <div class="card"><h3>App FoodExpress</h3><div class="status">Progresso: 30%</div><p>Previsão: 30/06/2026</p></div>
+      `;
+    }
+
+    function mostrarAvaliacoesEmpresa() {
+      document.getElementById("pageTitle").innerHTML = "⭐ Avaliações Recebidas";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <h3>Média Geral: 4.8 ★</h3>
+          <p>"Excelente trabalho!" - Ana Silva ★★★★★</p>
+          <p>"Muito profissional" - Carlos Menezes ★★★★★</p>
+          <p>"Bom, mas atrasou" - Juliana Rocha ★★★★☆</p>
+        </div>
+      `;
+    }
+
+    function mostrarHistoricoEmpresa() {
+      document.getElementById("pageTitle").innerHTML = "📁 Histórico de Trabalhos";
+      document.getElementById("pageContent").innerHTML = `
+        <ul class="history-list">
+          <li><strong>Site VarejoXYZ</strong> - Concluído 10/01/2026</li>
+          <li><strong>Sistema LogísticaABC</strong> - Concluído 05/02/2026</li>
+          <li><strong>Landing Page InovaStartup</strong> - Concluído 20/03/2026</li>
+        </ul>
+      `;
+    }
+
+    // ==================== TELAS ADMIN ====================
+    function mostrarGerenciarUsuarios() {
+      document.getElementById("pageTitle").innerHTML = "👥 Gerenciar Usuários";
+      let html = `<h3>Freelancers</h3><ul class="history-list">`;
+      freelancers.forEach(f => {
+        html += `<li>${f.nome} - ${f.categoria} <button class="btn btn-secondary" onclick="suspender('Freelancer', ${f.id})">Suspender</button></li>`;
+      });
+      html += `</ul><h3>Empresas</h3><ul class="history-list">`;
+      empresas.forEach(e => {
+        html += `<li>${e.nome} - ${e.servicos} <button class="btn btn-secondary" onclick="suspender('Empresa', ${e.id})">Suspender</button></li>`;
+      });
+      html += `</ul>`;
+      document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function mostrarMonitorar() {
+      document.getElementById("pageTitle").innerHTML = "📊 Monitoramento";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <p><strong>Contratações:</strong> ${contratacoes.length}</p>
+          <p><strong>Mensagens:</strong> ${mensagens.length}</p>
+          <p><strong>Usuários ativos:</strong> 12</p>
+          <p><strong>Último acesso:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+      `;
+    }
+
+    function mostrarModerar() {
+      document.getElementById("pageTitle").innerHTML = "🚫 Moderação";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <p>Nenhum conteúdo denunciado</p>
+          <button class="btn btn-primary" onclick="alert('Revisar portfólios')">🔍 Revisar Portfólios</button>
+          <button class="btn btn-primary" onclick="alert('Revisar avaliações')">⭐ Revisar Avaliações</button>
+        </div>
+      `;
+    }
+
+    function mostrarGerenciarCategorias() {
+      document.getElementById("pageTitle").innerHTML = "🏷️ Gerenciar Categorias";
+      let html = `<ul class="history-list">`;
+      categorias.forEach((cat, i) => {
+        html += `<li>${cat} <button class="btn btn-secondary" onclick="editarCategoria(${i})">✏️ Editar</button></li>`;
+      });
+      html += `</ul><div style="margin-top:1rem; display:flex; gap:0.5rem;">
+        <input type="text" id="novaCategoria" placeholder="Nova categoria" style="flex:1; padding:0.5rem;">
+        <button class="btn btn-primary" onclick="adicionarCategoria()">➕ Adicionar</button>
+      </div>`;
+      document.getElementById("pageContent").innerHTML = html;
+    }
+
+    function mostrarRelatorios() {
+      document.getElementById("pageTitle").innerHTML = "📈 Relatórios";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <p><strong>Freelancers mais contratados:</strong> Ana Silva, Carlos Menezes</p>
+          <p><strong>Média avaliações:</strong> 4.8 ★</p>
+          <p><strong>Categoria mais procurada:</strong> Desenvolvimento Web</p>
+          <button class="btn btn-primary" onclick="alert('Exportando PDF')">📄 Exportar Relatório</button>
+        </div>
+      `;
+    }
+
+    function mostrarSuporte() {
+      document.getElementById("pageTitle").innerHTML = "🆘 Suporte";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <textarea rows="4" placeholder="Descreva seu problema..." style="width:100%; padding:0.5rem; margin-bottom:1rem;"></textarea>
+          <button class="btn btn-primary" onclick="alert('Chamado aberto!')">📞 Abrir Chamado</button>
+        </div>
+      `;
+    }
+
+    function mostrarSeguranca() {
+      document.getElementById("pageTitle").innerHTML = "🔒 Segurança";
+      document.getElementById("pageContent").innerHTML = `
+        <div class="card">
+          <p><strong>Logs de acesso:</strong> 156 hoje</p>
+          <p><strong>Tentativas inválidas:</strong> 3</p>
+          <button class="btn btn-primary" onclick="alert('Auditar permissões')">🔐 Auditar Permissões</button>
+        </div>
+      `;
+    }
+
+    // ==================== HOME ====================
+    function mostrarHome() {
+      if (roleAtual === "freelancer") {
+        mostrarBuscar();
+      } else if (roleAtual === "empresa") {
+        mostrarPerfilEmpresa();
+      } else {
+        mostrarMonitorar();
+      }
+    }
+
+    // ==================== TROCAR ROLE ====================
+    function mudarRole(role) {
+      roleAtual = role;
+      renderSidebar();
+      mostrarHome();
+    }
+
+    // Eventos dos botões de role
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        mudarRole(this.getAttribute('data-role'));
+      });
+    });
+
+    // Inicializar
+    renderSidebar();
+    mostrarHome();
+  </script>
+</body>
+</html>
