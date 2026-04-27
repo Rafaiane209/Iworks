@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IWorks - Plataforma de Prestadores de Serviços</title>
+  <title>IWorks - Plataforma de Freelancers</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * {
@@ -234,7 +234,7 @@
       margin-bottom: 0.3rem;
       font-weight: 600;
     }
-    .form-group input, .form-group textarea, .form-group select {
+    .form-group input, .form-group textarea {
       width: 100%;
       padding: 0.5rem;
       border: 1px solid #ddd;
@@ -316,7 +316,7 @@
   <div class="header">
     <div class="logo">
       <h1>I<span>Works</span></h1>
-      <p>Conectando contratantes e prestadores de serviços</p>
+      <p>Conectando contratantes e freelancers</p>
     </div>
     <div class="role-selector">
       <button class="role-btn active" data-role="contratante">👤 Contratante</button>
@@ -333,29 +333,90 @@
     </div>
   </div>
 
-  <!-- Modal para chat -->
+  <!-- Modal de Chat -->
   <div id="chatModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="chatFreelancerNome">Chat com Freelancer</h3>
-        <span class="close-modal" onclick="fecharChat()">&times;</span>
+        <span class="close-modal" onclick="fecharModal('chatModal')">&times;</span>
       </div>
-      <div class="chat-container" style="margin-top:0">
-        <div class="chat-messages" id="chatMessagesModal" style="height:250px"></div>
-        <div class="chat-input">
-          <input type="text" id="chatMsgInput" placeholder="Digite sua mensagem...">
-          <button class="btn btn-primary" onclick="enviarMensagemChat()">Enviar</button>
-        </div>
+      <div class="chat-messages" id="chatMessagesModal" style="height:250px"></div>
+      <div class="chat-input">
+        <input type="text" id="chatMsgInput" placeholder="Digite sua mensagem...">
+        <button class="btn btn-primary" onclick="enviarMensagemChat()">Enviar</button>
       </div>
     </div>
   </div>
 
+  <!-- Modal de Edição de Perfil -->
+  <div id="perfilModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✏️ Editar Perfil</h3>
+        <span class="close-modal" onclick="fecharModal('perfilModal')">&times;</span>
+      </div>
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="perfilNome">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="perfilEmail">
+      </div>
+      <div class="form-group">
+        <label>Telefone</label>
+        <input type="text" id="perfilTelefone">
+      </div>
+      <div class="form-group">
+        <label>Cidade</label>
+        <input type="text" id="perfilCidade">
+      </div>
+      <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
+    </div>
+  </div>
+
+  <!-- Modal CRUD Freelancer (Admin) -->
+  <div id="crudModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitulo">Freelancer</h3>
+        <span class="close-modal" onclick="fecharModal('crudModal')">&times;</span>
+      </div>
+      <input type="hidden" id="freelancerId">
+      <div class="form-group">
+        <label>Nome</label>
+        <input type="text" id="freelancerNome">
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <input type="text" id="freelancerCategoria">
+      </div>
+      <div class="form-group">
+        <label>Preço</label>
+        <input type="text" id="freelancerPreco">
+      </div>
+      <div class="form-group">
+        <label>Portfólio</label>
+        <textarea id="freelancerPortfolio" rows="2"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="freelancerEmail">
+      </div>
+      <div class="form-group">
+        <label>Telefone</label>
+        <input type="text" id="freelancerTelefone">
+      </div>
+      <button class="btn btn-primary" onclick="salvarFreelancer()">Salvar</button>
+    </div>
+  </div>
+
   <footer>
-    <p>IWorks - Plataforma de conexão entre contratantes e prestadores de serviços. | Segurança e confiança</p>
+    <p>IWorks - Plataforma de conexão entre contratantes e freelancers | Segurança e confiança</p>
   </footer>
 
   <script>
-    // ==================== DADOS ====================
+    // ==================== DADOS GLOBAIS ====================
     let freelancers = [
       { id: 1, nome: "Ana Silva", categoria: "Design Gráfico", rating: 4.9, preco: "R$ 80/hora", portfolio: "Logos, identidade visual", email: "ana@email.com", telefone: "(11) 99999-1111" },
       { id: 2, nome: "Carlos Menezes", categoria: "Desenvolvimento Web", rating: 4.8, preco: "R$ 120/hora", portfolio: "React, Node.js", email: "carlos@email.com", telefone: "(11) 99999-2222" },
@@ -365,12 +426,37 @@
 
     let contratacoes = [];
     let favoritos = [];
-    let chats = {}; // { freelancerId: [mensagens] }
+    let chats = {};
     let proximoIdContrato = 1;
     let freelancerSelecionadoChat = null;
     let roleAtual = "contratante";
 
-    // ==================== FUNÇÕES GLOBAIS ====================
+    // ==================== FUNÇÕES AUXILIARES ====================
+    function fecharModal(modalId) {
+      document.getElementById(modalId).style.display = "none";
+      if (modalId === "chatModal") {
+        freelancerSelecionadoChat = null;
+      }
+    }
+
+    function atualizarChatModal() {
+      let chatDiv = document.getElementById("chatMessagesModal");
+      if (!chatDiv) return;
+      let msgs = chats[freelancerSelecionadoChat] || [];
+      if (msgs.length === 0) {
+        chatDiv.innerHTML = '<p style="text-align:center; color:#999;">💬 Nenhuma mensagem ainda</p>';
+      } else {
+        chatDiv.innerHTML = msgs.map(m => `
+          <div class="message">
+            <strong>${m.de}:</strong> ${m.texto}
+            <small style="color:#999; float:right;">${m.hora}</small>
+          </div>
+        `).join('');
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      }
+    }
+
+    // ==================== FUNÇÕES GLOBAIS ACESSÍVEIS VIA HTML ====================
     window.contratar = function(id) {
       let freelancer = freelancers.find(f => f.id === id);
       if (freelancer) {
@@ -421,13 +507,8 @@
       if (!chats[freelancerId]) {
         chats[freelancerId] = [];
       }
-      atualizarChatModal(freelancerId);
+      atualizarChatModal();
       document.getElementById("chatModal").style.display = "flex";
-    };
-
-    window.fecharChat = function() {
-      document.getElementById("chatModal").style.display = "none";
-      freelancerSelecionadoChat = null;
     };
 
     window.enviarMensagemChat = function() {
@@ -440,27 +521,23 @@
           hora: new Date().toLocaleTimeString()
         });
         input.value = "";
-        atualizarChatModal(freelancerSelecionadoChat);
+        atualizarChatModal();
       }
     };
 
-    window.atualizarChatModal = function(freelancerId) {
-      let chatDiv = document.getElementById("chatMessagesModal");
-      let msgs = chats[freelancerId] || [];
-      if (msgs.length === 0) {
-        chatDiv.innerHTML = '<p style="text-align:center; color:#999;">💬 Nenhuma mensagem ainda</p>';
-      } else {
-        chatDiv.innerHTML = msgs.map(m => `
-          <div class="message">
-            <strong>${m.de}:</strong> ${m.texto}
-            <small style="color:#999; float:right;">${m.hora}</small>
-          </div>
-        `).join('');
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-      }
+    // CRUD Admin
+    window.novoFreelancer = function() {
+      document.getElementById("freelancerId").value = "";
+      document.getElementById("freelancerNome").value = "";
+      document.getElementById("freelancerCategoria").value = "";
+      document.getElementById("freelancerPreco").value = "";
+      document.getElementById("freelancerPortfolio").value = "";
+      document.getElementById("freelancerEmail").value = "";
+      document.getElementById("freelancerTelefone").value = "";
+      document.getElementById("modalTitulo").innerText = "➕ Novo Freelancer";
+      document.getElementById("crudModal").style.display = "flex";
     };
 
-    // CRUD de freelancers (Admin)
     window.editarFreelancer = function(id) {
       let freelancer = freelancers.find(f => f.id === id);
       if (freelancer) {
@@ -485,7 +562,7 @@
     };
 
     window.salvarFreelancer = function() {
-      let id = parseInt(document.getElementById("freelancerId").value);
+      let id = document.getElementById("freelancerId").value;
       let nome = document.getElementById("freelancerNome").value;
       let categoria = document.getElementById("freelancerCategoria").value;
       let preco = document.getElementById("freelancerPreco").value;
@@ -498,8 +575,7 @@
         return;
       }
 
-      if (id === 0) {
-        // Novo
+      if (id === "" || id === "0") {
         let novoId = Math.max(...freelancers.map(f => f.id), 0) + 1;
         freelancers.push({
           id: novoId,
@@ -508,35 +584,14 @@
         });
         alert("✅ Freelancer cadastrado!");
       } else {
-        // Editar
-        let index = freelancers.findIndex(f => f.id === id);
+        let index = freelancers.findIndex(f => f.id === parseInt(id));
         if (index !== -1) {
           freelancers[index] = { ...freelancers[index], nome, categoria, preco, portfolio, email, telefone };
           alert("✅ Freelancer atualizado!");
         }
       }
-      fecharCrudModal();
+      fecharModal("crudModal");
       mostrarGerenciarFreelancers();
-    };
-
-    window.novoFreelancer = function() {
-      document.getElementById("freelancerId").value = 0;
-      document.getElementById("freelancerNome").value = "";
-      document.getElementById("freelancerCategoria").value = "";
-      document.getElementById("freelancerPreco").value = "";
-      document.getElementById("freelancerPortfolio").value = "";
-      document.getElementById("freelancerEmail").value = "";
-      document.getElementById("freelancerTelefone").value = "";
-      document.getElementById("modalTitulo").innerText = "➕ Novo Freelancer";
-      document.getElementById("crudModal").style.display = "flex";
-    };
-
-    window.fecharCrudModal = function() {
-      document.getElementById("crudModal").style.display = "none";
-    };
-
-    window.fecharPerfilModal = function() {
-      document.getElementById("perfilModal").style.display = "none";
     };
 
     window.salvarPerfil = function() {
@@ -546,27 +601,21 @@
       let cidade = document.getElementById("perfilCidade").value;
       
       if (nome) {
-        alert(`✅ Perfil atualizado!\nNome: ${nome}\nEmail: ${email}`);
-        document.getElementById("perfilModal").style.display = "none";
+        alert(`✅ Perfil atualizado!\nNome: ${nome}\nEmail: ${email}\nTelefone: ${telefone}\nCidade: ${cidade}`);
+        fecharModal("perfilModal");
         mostrarPerfil();
       } else {
         alert("Preencha o nome!");
       }
     };
 
-    // ==================== TELAS CONTRATANTE ====================
-    function mostrarBuscar() {
-      document.getElementById("pageTitle").innerHTML = "🔍 Buscar Freelancers";
-      let html = `
-        <div class="search-box">
-          <input type="text" id="searchInput" placeholder="🔎 Buscar por nome, categoria ou serviço...">
-          <button class="btn btn-primary" onclick="filtrarFreelancers()">Buscar</button>
-        </div>
-        <div id="resultadosBusca"></div>
-      `;
-      document.getElementById("pageContent").innerHTML = html;
-      filtrarFreelancers();
-    }
+    window.abrirPerfilEdicao = function() {
+      document.getElementById("perfilNome").value = "Isabelle Demétrio Carvalho";
+      document.getElementById("perfilEmail").value = "isabelle@email.com";
+      document.getElementById("perfilTelefone").value = "(11) 98765-4321";
+      document.getElementById("perfilCidade").value = "São Paulo, SP";
+      document.getElementById("perfilModal").style.display = "flex";
+    };
 
     window.filtrarFreelancers = function() {
       let termo = document.getElementById("searchInput")?.value.toLowerCase() || "";
@@ -595,6 +644,20 @@
       document.getElementById("resultadosBusca").innerHTML = html;
     };
 
+    // ==================== FUNÇÕES DE TELA ====================
+    function mostrarBuscar() {
+      document.getElementById("pageTitle").innerHTML = "🔍 Buscar Freelancers";
+      let html = `
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔎 Buscar por nome, categoria ou serviço..." onkeyup="filtrarFreelancers()">
+          <button class="btn btn-primary" onclick="filtrarFreelancers()">Buscar</button>
+        </div>
+        <div id="resultadosBusca"></div>
+      `;
+      document.getElementById("pageContent").innerHTML = html;
+      filtrarFreelancers();
+    }
+
     function mostrarPerfil() {
       document.getElementById("pageTitle").innerHTML = "👤 Meu Perfil (Contratante)";
       document.getElementById("pageContent").innerHTML = `
@@ -608,14 +671,6 @@
         </div>
       `;
     }
-
-    window.abrirPerfilEdicao = function() {
-      document.getElementById("perfilNome").value = "Isabelle Demétrio Carvalho";
-      document.getElementById("perfilEmail").value = "isabelle@email.com";
-      document.getElementById("perfilTelefone").value = "(11) 98765-4321";
-      document.getElementById("perfilCidade").value = "São Paulo, SP";
-      document.getElementById("perfilModal").style.display = "flex";
-    };
 
     function mostrarHistorico() {
       document.getElementById("pageTitle").innerHTML = "📋 Histórico de Contratações";
@@ -657,7 +712,7 @@
       document.getElementById("pageContent").innerHTML = html;
     }
 
-    // ==================== TELAS FREELANCER ====================
+    // Telas Freelancer
     function mostrarPerfilFreelancer() {
       document.getElementById("pageTitle").innerHTML = "💼 Meu Perfil (Freelancer)";
       document.getElementById("pageContent").innerHTML = `
@@ -670,7 +725,6 @@
           <p>📧 ana@email.com</p>
           <p>📱 (11) 99999-1111</p>
           <button class="btn btn-primary" onclick="alert('Edição de perfil freelancer')">✏️ Editar Perfil</button>
-          <button class="btn btn-secondary" onclick="mostrarMeusServicos()">📋 Meus Serviços</button>
         </div>
       `;
     }
@@ -706,7 +760,7 @@
       `;
     }
 
-    // ==================== TELAS ADMIN ====================
+    // Telas Admin
     function mostrarGerenciarFreelancers() {
       document.getElementById("pageTitle").innerHTML = "👥 Gerenciar Freelancers";
       let html = `
@@ -759,7 +813,7 @@
       categorias.forEach((cat, i) => {
         html += `<li>${cat} <button class="btn btn-secondary" onclick="alert('Editar categoria')">✏️ Editar</button></li>`;
       });
-      html += `</ul><div style="margin-top:1rem;"><input type="text" placeholder="Nova categoria" style="padding:0.5rem; width:200px;"><button class="btn btn-primary" onclick="alert('Adicionar categoria')">➕ Adicionar</button></div>`;
+      html += `</ul><div style="margin-top:1rem;"><input type="text" id="novaCategoria" placeholder="Nova categoria" style="padding:0.5rem; width:200px;"><button class="btn btn-primary" onclick="alert('Adicionar categoria: ' + document.getElementById('novaCategoria').value)">➕ Adicionar</button></div>`;
       document.getElementById("pageContent").innerHTML = html;
     }
 
@@ -778,8 +832,8 @@
       document.getElementById("pageTitle").innerHTML = "🆘 Suporte";
       document.getElementById("pageContent").innerHTML = `
         <div class="card">
-          <textarea rows="4" placeholder="Descreva seu problema..." style="width:100%; padding:0.5rem; margin-bottom:1rem;"></textarea>
-          <button class="btn btn-primary" onclick="alert('Chamado aberto!')">📞 Abrir Chamado</button>
+          <textarea id="problemaMsg" rows="4" placeholder="Descreva seu problema..." style="width:100%; padding:0.5rem; margin-bottom:1rem;"></textarea>
+          <button class="btn btn-primary" onclick="alert('Chamado aberto: ' + document.getElementById('problemaMsg').value)">📞 Abrir Chamado</button>
         </div>
       `;
     }
@@ -795,7 +849,28 @@
       `;
     }
 
-    // ==================== MENUS ====================
+    // ==================== MENU E NAVEGAÇÃO ====================
+    function executarAcao(acao) {
+      if (roleAtual === "contratante") {
+        if (acao === "buscar") mostrarBuscar();
+        else if (acao === "perfil") mostrarPerfil();
+        else if (acao === "historico") mostrarHistorico();
+        else if (acao === "favoritos") mostrarFavoritos();
+      } else if (roleAtual === "freelancer") {
+        if (acao === "perfilFreelancer") mostrarPerfilFreelancer();
+        else if (acao === "servicosFreelancer") mostrarMeusServicos();
+        else if (acao === "solicitacoes") mostrarSolicitacoesFreelancer();
+      } else if (roleAtual === "admin") {
+        if (acao === "gerenciar") mostrarGerenciarFreelancers();
+        else if (acao === "monitorar") mostrarMonitorar();
+        else if (acao === "moderar") mostrarModerar();
+        else if (acao === "categorias") mostrarGerenciarCategorias();
+        else if (acao === "relatorios") mostrarRelatorios();
+        else if (acao === "suporte") mostrarSuporte();
+        else if (acao === "seguranca") mostrarSeguranca();
+      }
+    }
+
     function renderSidebar() {
       let sidebar = document.getElementById("sidebar");
       let menus = {
@@ -813,11 +888,43 @@
         admin: [
           { icone: "👥", nome: "Gerenciar Freelancers", acao: "gerenciar" },
           { icone: "📊", nome: "Monitorar", acao: "monitorar" },
-        ],
-    }
-}
+          { icone: "🚫", nome: "Moderar", acao: "moderar" },
+          { icone: "🏷️", nome: "Categorias", acao: "categorias" },
+          { icone: "📈", nome: "Relatórios", acao: "relatorios" },
+          { icone: "🆘", nome: "Suporte", acao: "suporte" },
+          { icone: "🔒", nome: "Segurança", acao: "seguranca" }
+        ]
+      };
 
-</script>
+      let menuAtual = menus[roleAtual];
+      sidebar.innerHTML = menuAtual.map(item => `
+        <div class="menu-item" onclick="executarAcao('${item.acao}')">
+          <span>${item.icone}</span>
+          <span>${item.nome}</span>
+        </div>
+      `).join('');
+    }
+
+    function mudarRole(role) {
+      roleAtual = role;
+      renderSidebar();
+      if (roleAtual === "contratante") mostrarBuscar();
+      else if (roleAtual === "freelancer") mostrarPerfilFreelancer();
+      else if (roleAtual === "admin") mostrarGerenciarFreelancers();
+    }
+
+    // Eventos dos botões de role
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        mudarRole(this.getAttribute('data-role'));
+      });
+    });
+
+    // Inicializar
+    renderSidebar();
+    mostrarBuscar();
+  </script>
 </body>
 </html>
-    
